@@ -24,8 +24,14 @@ async function syncListings(dateFilter, body) {
 
   try {
     const url = new URL(
-      "https://pvp.giustizia.it/ric-496b258c-986a1b71/ric-ms/ricerca/vendite?language=it&page=0&size=1&sort=dataOraVendita,desc&sort=citta,asc"
+      "https://pvp.giustizia.it/ric-496b258c-986a1b71/ric-ms/ricerca/vendite"
     );
+    url.searchParams.set("language", "it");
+    url.searchParams.set("page", "0");
+    // Change this param if you need to get more results in the same day
+    url.searchParams.set("size", "10");
+    url.searchParams.set("sort", "dataOraVendita,desc");
+    url.searchParams.set("sort", "citta,asc");
 
     const response = await fetch(url.toString(), {
       method: "POST",
