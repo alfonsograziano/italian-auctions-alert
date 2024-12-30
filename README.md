@@ -95,4 +95,8 @@ MONGO_URI=mongodb+srv://<username>:<password>@<cluster-url>/myFirstDatabase?retr
 
 ### Congratulations! 🎉
 
-You have successfully set up the Real Estate Notification System. It will now monitor Italian auctions and keep you updated in real-time.
+You have successfully set up the Real Estate Notification System. It will now monitor Italian auctions and keep you updated daily.
+
+---
+
+Built with love from a lazy developer with the help of ChatGPT while eating a lot of Panettone
