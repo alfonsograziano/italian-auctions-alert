@@ -20,6 +20,8 @@ async function syncListings(dateFilter, body) {
   await mongoose.connect(MONGO_URI, {
     useUnifiedTopology: true,
   });
+  console.log("Connected to MongoDB");
+
   try {
     const url = new URL(
       "https://pvp.giustizia.it/ric-496b258c-986a1b71/ric-ms/ricerca/vendite?language=it&page=0&size=1&sort=dataOraVendita,desc&sort=citta,asc"
@@ -37,9 +39,13 @@ async function syncListings(dateFilter, body) {
       throw new Error(`Failed to fetch: ${response.statusText}`);
     }
 
+    console.log("Data fetched successfully from PVP Giustizia");
     const data = await response.json();
     const listings = data.body.content;
 
+    console.log(
+      `Fetched ${listings.length} listings. Checking for new ones...`
+    );
     const existingIds = await Listing.find({
       id: { $in: listings.map((listing) => listing.id) },
     }).select("id");
@@ -53,7 +59,10 @@ async function syncListings(dateFilter, body) {
       );
     });
 
+    console.log(`${newListings.length} new listings found.`);
+
     for (const listing of newListings) {
+      console.log(`Processing listing with ID: ${listing.id}`);
       const newListing = new Listing({
         id: listing.id,
         analyzed: true,
@@ -61,6 +70,7 @@ async function syncListings(dateFilter, body) {
       });
 
       await newListing.save();
+      console.log(`Listing with ID: ${listing.id} saved to MongoDB.`);
 
       const emailParams = {
         Destination: {
@@ -79,15 +89,18 @@ async function syncListings(dateFilter, body) {
 
       const command = new SendEmailCommand(emailParams);
       await sesClient.send(command);
+      console.log(`Email notification sent for listing ID: ${listing.id}`);
     }
   } catch (error) {
     console.error("Error syncing listings:", error);
   } finally {
     await mongoose.disconnect();
+    console.log("Disconnected from MongoDB");
   }
 }
 
 export const handler = async () => {
+  console.log("Handler invoked. Starting sync process...");
   const dateFilter = new Date("2024-12-02");
   const body = {
     tipoLotto: "IMMOBILI",
@@ -98,4 +111,5 @@ export const handler = async () => {
   };
 
   await syncListings(dateFilter, body);
+  console.log("Sync process completed.");
 };
